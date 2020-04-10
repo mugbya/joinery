@@ -63,6 +63,8 @@ import joinery.impl.SparseBitSet;
 import joinery.impl.Timeseries;
 import joinery.impl.Transforms;
 import joinery.impl.Views;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 
 /**
  * A data frame implementation in the spirit
@@ -196,6 +198,24 @@ implements Iterable<List<V>> {
      */
     public DataFrame(final List<? extends List<? extends V>> data) {
         this(Collections.emptyList(), Collections.emptyList(), data);
+    }
+
+    /**
+     * Construct a data frame from the specified list of columns and specified columns.
+     *
+     * <pre> {@code
+     * > List<List<Object>> data = Arrays.asList(
+     * >       Arrays.<Object>asList("alpha", "bravo", "charlie"),
+     * >       Arrays.<Object>asList(1, 2, 3)
+     * > );
+     * > DataFrame<Object> df = new DataFrame<>(data, "name", "value");
+     * > df.row(0);
+     * [alpha, 1] }</pre>
+     *
+     * @param data a list of columns containing the data elements.
+     */
+    public DataFrame(final List<? extends List<? extends V>> data, final String ... columns) {
+        this(Collections.emptyList(), Arrays.asList((Object[])columns), data);
     }
 
     /**
@@ -2215,6 +2235,15 @@ implements Iterable<List<V>> {
         return Serialization.readXls(input);
     }
 
+    public static final DataFrame<Object> readXls(final Sheet sheet)
+            throws IOException {
+        return Serialization.readXls(sheet);
+    }
+
+    public final void writeXls(final Sheet sheet){
+        Serialization.writeXls(this, sheet);
+    }
+
     /**
      * Write the data from the data frame
      * to the specified file as an excel workbook.
@@ -2231,13 +2260,64 @@ implements Iterable<List<V>> {
      * Write the data from the data frame
      * to the provided output stream as an excel workbook.
      *
-     * @param file the file to write
+     * @param output the file to write
      * @throws IOException if an error occurs writing the file
      */
     public final void writeXls(final OutputStream output)
     throws IOException {
         Serialization.writeXls(this, output);
     }
+
+    /**
+     * Read data from the specified excel
+     * workbook into a new data frame.
+     *
+     * @param file the excel workbook
+     * @return a new data frame
+     * @throws IOException if an error occurs reading the workbook
+     */
+    public static final DataFrame<Object> readXlsx(final String file)
+            throws IOException {
+        return Serialization.readXlsx(file, 0);
+    }
+
+
+    public static final DataFrame<Object> readXlsx(final String file, int sheetNum)
+            throws IOException {
+        return Serialization.readXlsx(file, sheetNum);
+    }
+
+    /**
+     * Read data from the input stream as an
+     * excel workbook into a new data frame.
+     *
+     * @param input the input stream
+     * @return a new data frame
+     * @throws IOException if an error occurs reading the input stream
+     */
+    public static final DataFrame<Object> readXlsx(final InputStream input)
+            throws IOException {
+        return Serialization.readXlsx(input, 0);
+    }
+
+    /**
+     * Read data from the input stream as an
+     * excel workbook into a new data frame.
+     *
+     * @param input the input stream
+     * @return a new data frame
+     * @throws IOException if an error occurs reading the input stream
+     */
+    public static final DataFrame<Object> readXlsx(final InputStream input, int sheetNum)
+            throws IOException {
+        return Serialization.readXlsx(input, sheetNum);
+    }
+
+    public static final DataFrame<Object> readXlsx(final Workbook wb, int sheetNum)
+            throws IOException {
+        return Serialization.readXlsx(wb, sheetNum);
+    }
+
 
     /**
      * Execute the SQL query and return the results as a new data frame.

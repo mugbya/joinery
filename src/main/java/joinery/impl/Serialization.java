@@ -47,11 +47,12 @@ import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CellType;
+//import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.supercsv.cellprocessor.ConvertNullTo;
 import org.supercsv.cellprocessor.FmtDate;
 import org.supercsv.cellprocessor.ift.CellProcessor;
@@ -320,16 +321,25 @@ public class Serialization {
         }
     }
 
-    public static DataFrame<Object> readXls(final String file)
-    throws IOException {
-        return readXls(file.contains("://") ?
-                    new URL(file).openStream() : new FileInputStream(file));
+    public static DataFrame<Object> readXlsx(final String file, int sheetNum)
+            throws IOException {
+        return readXlsx(file.contains("://") ?
+                new URL(file).openStream() : new FileInputStream(file), sheetNum);
     }
 
-    public static DataFrame<Object> readXls(final InputStream input)
-    throws IOException {
-        final Workbook wb = new HSSFWorkbook(input);
-        final Sheet sheet = wb.getSheetAt(0);
+    public static DataFrame<Object> readXlsx(final InputStream input, int sheetNum)
+            throws IOException {
+        final Workbook wb = new XSSFWorkbook(input);
+        return readXlsx(wb, sheetNum);
+    }
+
+    public static DataFrame<Object> readXlsx(final Workbook wb, int sheetNum)
+            throws IOException {
+        final Sheet sheet = wb.getSheetAt(sheetNum);
+        return readXls(sheet);
+    }
+
+    public static DataFrame<Object> readXls(final Sheet sheet) {
         final List<Object> columns = new ArrayList<>();
         final List<List<Object>> data = new ArrayList<>();
 
@@ -356,6 +366,19 @@ public class Serialization {
         }
 
         return df.convert();
+    }
+
+    public static DataFrame<Object> readXls(final String file)
+    throws IOException {
+        return readXls(file.contains("://") ?
+                    new URL(file).openStream() : new FileInputStream(file));
+    }
+
+    public static DataFrame<Object> readXls(final InputStream input)
+    throws IOException {
+        final Workbook wb = new HSSFWorkbook(input);
+        final Sheet sheet = wb.getSheetAt(0);
+        return readXls(sheet);
     }
 
     public static <V> void writeXls(final DataFrame<V> df, final String output)
@@ -390,14 +413,32 @@ public class Serialization {
         output.close();
     }
 
+    public static <V> void writeXls(final DataFrame<V> df, final Sheet sheet) {
+        Row row = sheet.createRow(0);
+        final Iterator<Object> it = df.columns().iterator();
+        for (int c = 0; c < df.size(); c++) {
+            final Cell cell = row.createCell(c);
+            writeCell(cell, it.hasNext() ? it.next() : c);
+        }
+
+        // add data values
+        for (int r = 0; r < df.length(); r++) {
+            row = sheet.createRow(r + 1);
+            for (int c = 0; c < df.size(); c++) {
+                final Cell cell = row.createCell(c);
+                writeCell(cell, df.get(r, c));
+            }
+        }
+    }
+
     private static final Object readCell(final Cell cell) {
         switch (cell.getCellType()) {
-            case NUMERIC:
+            case Cell.CELL_TYPE_NUMERIC:
                 if (DateUtil.isCellDateFormatted(cell)) {
                     return DateUtil.getJavaDate(cell.getNumericCellValue());
                 }
                 return cell.getNumericCellValue();
-            case BOOLEAN:
+            case Cell.CELL_TYPE_BOOLEAN:
                 return cell.getBooleanCellValue();
             default:
                 return cell.getStringCellValue();
@@ -406,18 +447,18 @@ public class Serialization {
 
     private static final void writeCell(final Cell cell, final Object value) {
         if (value instanceof Number) {
-            cell.setCellType(CellType.NUMERIC);
+            cell.setCellType(Cell.CELL_TYPE_NUMERIC);
             cell.setCellValue(Number.class.cast(value).doubleValue());
         } else if (value instanceof Date) {
             final CellStyle style = cell.getSheet().getWorkbook().createCellStyle();
             style.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
             cell.setCellStyle(style);
-            cell.setCellType(CellType.NUMERIC);
+            cell.setCellType(Cell.CELL_TYPE_NUMERIC);
             cell.setCellValue(Date.class.cast(value));
         } else if (value instanceof Boolean) {
-            cell.setCellType(CellType.BOOLEAN);
+            cell.setCellType(Cell.CELL_TYPE_BOOLEAN);
         } else {
-            cell.setCellType(CellType.STRING);
+            cell.setCellType(Cell.CELL_TYPE_STRING);
             cell.setCellValue(value != null ? String.valueOf(value) : "");
         }
     }

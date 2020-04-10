@@ -503,6 +503,15 @@ extends ScriptableObject {
         return new DataFrameAdapter(ctx.newObject(object, df.getClass().getSimpleName()), df);
     }
 
+    public static Scriptable jsStaticFunction_readXlsx(final Context ctx, final Scriptable object, final Object[] args, final Function func)
+            throws IOException {
+        final String file = Context.toString(args[0]);
+//        final Number sheetNum = Context.toNumber(args[1]);
+
+        final DataFrame<Object> df = DataFrame.readXlsx(file);
+        return new DataFrameAdapter(ctx.newObject(object, df.getClass().getSimpleName()), df);
+    }
+
     public void jsFunction_writeXls(final String file)
     throws IOException {
         df.writeXls(file);

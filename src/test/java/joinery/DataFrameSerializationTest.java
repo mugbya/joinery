@@ -210,6 +210,30 @@ public class DataFrameSerializationTest {
     }
 
     @Test
+    public void testReadXlsxInputStream()
+            throws IOException {
+        final DataFrame<Object> df = DataFrame.readXlsx(ClassLoader.getSystemResourceAsStream("serialization.xlsx"), 1);
+
+//        final Object[][] expected = new Object[][] {
+//                new Object[] { "a", "a", "b", "b", "c", "c" },
+//                new Object[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot" },
+//                new Object[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }
+//        };
+        System.out.println("print col ...");
+        int col_len = df.size();
+        for (int i = 0; i < col_len; i++) {
+            System.out.println(df.col(i));;
+        }
+
+        System.out.println("\nprint row ...");
+        int row_len = df.length();
+        for (int i = 0; i < row_len; i++) {
+            System.out.println(df.row(i));;
+        }
+
+    }
+
+    @Test
     public void testWriteXlsString()
     throws IOException {
         final DataFrame<Object> df = DataFrame.readXls(ClassLoader.getSystemResourceAsStream("serialization.xls"));
