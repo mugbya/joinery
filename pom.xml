@@ -3,7 +3,7 @@
 
   <groupId>joinery</groupId>
   <artifactId>joinery-dataframe</artifactId>
-  <version>1.10-SNAPSHOT</version>
+  <version>1.11-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Joinery</name>

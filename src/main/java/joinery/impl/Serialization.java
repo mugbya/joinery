@@ -352,7 +352,13 @@ public class Serialization {
             } else {
                 // read data values
                 final List<Object> values = new ArrayList<>();
-                for (final Cell cell : row) {
+
+                for (int i=0; i < columns.size(); i++) {
+                    final Cell cell = row.getCell(i);
+                    if (cell == null) {
+                        values.add(null);
+                        continue;
+                    }
                     values.add(readCell(cell));
                 }
                 data.add(values);
