@@ -2240,6 +2240,46 @@ implements Iterable<List<V>> {
         return Serialization.readXls(sheet);
     }
 
+    public static final DataFrame<Object> readXls(final Sheet sheet, Map<Integer, Integer> dType)
+            throws IOException {
+        return Serialization.readXls(sheet, dType);
+    }
+
+    public static final DataFrame<Object> readXls(final String file, int sheetNum)
+            throws IOException {
+        return Serialization.readXls(file, sheetNum);
+    }
+
+    /**
+     * Read data from the input stream as an
+     * excel workbook into a new data frame.
+     *
+     * @param input the input stream
+     * @return a new data frame
+     * @throws IOException if an error occurs reading the input stream
+     */
+    public static final DataFrame<Object> readXls(final InputStream input, int sheetNum)
+            throws IOException {
+        return Serialization.readXls(input, sheetNum);
+    }
+
+    public static final DataFrame<Object> readXls(final InputStream input, int sheetNum, Map<Integer, Integer> dType)
+            throws IOException {
+        return Serialization.readXls(input, sheetNum, dType);
+    }
+
+    public static final DataFrame<Object> readXls(final Workbook wb, int sheetNum)
+            throws IOException {
+        return Serialization.readXls(wb, sheetNum);
+    }
+
+    public static final DataFrame<Object> readXls(final Workbook wb, int sheetNum, Map<Integer, Integer> dType)
+            throws IOException {
+        return Serialization.readXls(wb, sheetNum, dType);
+    }
+
+
+
     public final void writeXls(final Sheet sheet){
         Serialization.writeXls(this, sheet);
     }
@@ -2268,55 +2308,6 @@ implements Iterable<List<V>> {
         Serialization.writeXls(this, output);
     }
 
-    /**
-     * Read data from the specified excel
-     * workbook into a new data frame.
-     *
-     * @param file the excel workbook
-     * @return a new data frame
-     * @throws IOException if an error occurs reading the workbook
-     */
-    public static final DataFrame<Object> readXlsx(final String file)
-            throws IOException {
-        return Serialization.readXlsx(file, 0);
-    }
-
-
-    public static final DataFrame<Object> readXlsx(final String file, int sheetNum)
-            throws IOException {
-        return Serialization.readXlsx(file, sheetNum);
-    }
-
-    /**
-     * Read data from the input stream as an
-     * excel workbook into a new data frame.
-     *
-     * @param input the input stream
-     * @return a new data frame
-     * @throws IOException if an error occurs reading the input stream
-     */
-    public static final DataFrame<Object> readXlsx(final InputStream input)
-            throws IOException {
-        return Serialization.readXlsx(input, 0);
-    }
-
-    /**
-     * Read data from the input stream as an
-     * excel workbook into a new data frame.
-     *
-     * @param input the input stream
-     * @return a new data frame
-     * @throws IOException if an error occurs reading the input stream
-     */
-    public static final DataFrame<Object> readXlsx(final InputStream input, int sheetNum)
-            throws IOException {
-        return Serialization.readXlsx(input, sheetNum);
-    }
-
-    public static final DataFrame<Object> readXlsx(final Workbook wb, int sheetNum)
-            throws IOException {
-        return Serialization.readXlsx(wb, sheetNum);
-    }
 
 
     /**

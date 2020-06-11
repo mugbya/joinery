@@ -508,7 +508,7 @@ extends ScriptableObject {
         final String file = Context.toString(args[0]);
 //        final Number sheetNum = Context.toNumber(args[1]);
 
-        final DataFrame<Object> df = DataFrame.readXlsx(file);
+        final DataFrame<Object> df = DataFrame.readXls(file);
         return new DataFrameAdapter(ctx.newObject(object, df.getClass().getSimpleName()), df);
     }
 

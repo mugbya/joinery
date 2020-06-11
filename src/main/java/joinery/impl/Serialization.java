@@ -33,6 +33,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -321,22 +322,34 @@ public class Serialization {
         }
     }
 
-    public static DataFrame<Object> readXlsx(final String file, int sheetNum)
+    public static DataFrame<Object> readXls(final String file, int sheetNum)
             throws IOException {
-        return readXlsx(file.contains("://") ?
+        return readXls(file.contains("://") ?
                 new URL(file).openStream() : new FileInputStream(file), sheetNum);
     }
 
-    public static DataFrame<Object> readXlsx(final InputStream input, int sheetNum)
+    public static DataFrame<Object> readXls(final InputStream input, int sheetNum)
             throws IOException {
         final Workbook wb = new XSSFWorkbook(input);
-        return readXlsx(wb, sheetNum);
+        return readXls(wb, sheetNum);
     }
 
-    public static DataFrame<Object> readXlsx(final Workbook wb, int sheetNum)
+    public static DataFrame<Object> readXls(final InputStream input, int sheetNum, Map<Integer, Integer> dType)
+            throws IOException {
+        final Workbook wb = new XSSFWorkbook(input);
+        return readXls(wb, sheetNum, dType);
+    }
+
+    public static DataFrame<Object> readXls(final Workbook wb, int sheetNum)
             throws IOException {
         final Sheet sheet = wb.getSheetAt(sheetNum);
         return readXls(sheet);
+    }
+
+    public static DataFrame<Object> readXls(final Workbook wb, int sheetNum, Map<Integer, Integer> dType)
+            throws IOException {
+        final Sheet sheet = wb.getSheetAt(sheetNum);
+        return readXls(sheet, dType);
     }
 
     public static DataFrame<Object> readXls(final Sheet sheet) {
@@ -372,6 +385,42 @@ public class Serialization {
         }
 
         return df.convert();
+    }
+
+    public static DataFrame<Object> readXls(final Sheet sheet, Map<Integer, Integer> dType) {
+        final List<Object> columns = new ArrayList<>();
+        final List<List<Object>> data = new ArrayList<>();
+
+        for (final Row row : sheet) {
+            if (row.getRowNum() == 0) {
+                // read header
+                for (final Cell cell : row) {
+                    columns.add(readCell(cell));
+                }
+            } else {
+                // read data values
+                final List<Object> values = new ArrayList<>();
+
+                for (int i=0; i < columns.size(); i++) {
+                    final Cell cell = row.getCell(i);
+                    if (cell == null) {
+                        values.add(null);
+                        continue;
+                    }
+                    Integer type = dType.get(i);
+                    values.add(readCell(cell, type));
+                }
+                data.add(values);
+            }
+        }
+
+        // create data frame
+        final DataFrame<Object> df = new DataFrame<>(columns);
+        for (final List<Object> row : data) {
+            df.append(row);
+        }
+
+        return df;
     }
 
     public static DataFrame<Object> readXls(final String file)
@@ -438,6 +487,39 @@ public class Serialization {
     }
 
     private static final Object readCell(final Cell cell) {
+        switch (cell.getCellType()) {
+            case Cell.CELL_TYPE_NUMERIC:
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    return DateUtil.getJavaDate(cell.getNumericCellValue());
+                }
+                return cell.getNumericCellValue();
+            case Cell.CELL_TYPE_BOOLEAN:
+                return cell.getBooleanCellValue();
+            default:
+                return cell.getStringCellValue();
+        }
+    }
+
+    private static final Object readCell(final Cell cell, Integer type) {
+        if (type != null){
+            switch (type) {
+                case Cell.CELL_TYPE_STRING:
+                    switch (cell.getCellType()) {
+                        case Cell.CELL_TYPE_NUMERIC:
+                            if (DateUtil.isCellDateFormatted(cell)) {
+                                return DateUtil.getJavaDate(cell.getNumericCellValue());
+                            }
+                            Double dou_obj = new Double(cell.getNumericCellValue());
+                            NumberFormat nf = NumberFormat.getInstance();
+                            nf.setGroupingUsed(false);
+                            return nf.format(dou_obj);
+                        case Cell.CELL_TYPE_BOOLEAN:
+                            return cell.getBooleanCellValue();
+                        default:
+                            return cell.getStringCellValue();
+                    }
+            }
+        }
         switch (cell.getCellType()) {
             case Cell.CELL_TYPE_NUMERIC:
                 if (DateUtil.isCellDateFormatted(cell)) {

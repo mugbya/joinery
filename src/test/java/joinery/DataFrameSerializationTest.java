@@ -38,6 +38,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.poi.ss.usermodel.Cell;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -212,13 +213,20 @@ public class DataFrameSerializationTest {
     @Test
     public void testReadXlsxInputStream()
             throws IOException {
-        final DataFrame<Object> df = DataFrame.readXlsx(ClassLoader.getSystemResourceAsStream("serialization.xlsx"), 1);
+
+        Map<Integer, Integer> dType = new HashMap<>();
+        dType.put(0, Cell.CELL_TYPE_STRING);
+
+        final DataFrame<Object> df = DataFrame.readXls(ClassLoader.getSystemResourceAsStream("serialization.xlsx"), 2, dType);
 
 //        final Object[][] expected = new Object[][] {
 //                new Object[] { "a", "a", "b", "b", "c", "c" },
 //                new Object[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot" },
 //                new Object[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }
 //        };
+
+
+
         System.out.println("print col ...");
         int col_len = df.size();
         for (int i = 0; i < col_len; i++) {
