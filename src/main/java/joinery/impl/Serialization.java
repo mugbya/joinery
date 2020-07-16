@@ -401,15 +401,32 @@ public class Serialization {
                 // read data values
                 final List<Object> values = new ArrayList<>();
 
+                // ?????????
+                int cnt = 0;
                 for (int i=0; i < columns.size(); i++) {
                     final Cell cell = row.getCell(i);
                     if (cell == null) {
                         values.add(null);
+                        cnt += 1;
                         continue;
                     }
                     Integer type = dType.get(i);
-                    values.add(readCell(cell, type));
+                    Object value = readCell(cell, type);
+
+                    // ??? excel  ?????????
+                    if (value == null || "".equals(value)) {
+                        values.add(null);
+                        cnt += 1;
+                        continue;
+                    }
+
+                    values.add(value);
                 }
+                // ??????????? data values; ?????? ????? data values ????????????????null???
+                if (cnt == columns.size() || values.size() == 0) {
+                    continue;
+                }
+
                 data.add(values);
             }
         }

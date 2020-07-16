@@ -217,7 +217,8 @@ public class DataFrameSerializationTest {
         Map<Integer, Integer> dType = new HashMap<>();
         dType.put(0, Cell.CELL_TYPE_STRING);
 
-        final DataFrame<Object> df = DataFrame.readXls(ClassLoader.getSystemResourceAsStream("serialization.xlsx"), 2, dType);
+        final DataFrame<Object> df = DataFrame.readXls(ClassLoader.getSystemResourceAsStream("serialization.xlsx"), 1, dType);
+//        final DataFrame<Object> df = DataFrame.readXls(ClassLoader.getSystemResourceAsStream("aaa.xlsx"), 0, dType);
 
 //        final Object[][] expected = new Object[][] {
 //                new Object[] { "a", "a", "b", "b", "c", "c" },
